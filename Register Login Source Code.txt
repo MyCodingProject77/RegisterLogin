@@ -1,0 +1,103 @@
+
+
+
+
+
+   1) Create MySQL Database & Table
+
+
+      CREATE DATABASE userdb;
+
+USE userdb;
+
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL
+);
+
+
+
+
+
+
+   2) Add MySQL Connector to NetBeans
+
+
+
+
+   3) Registration Form Code
+
+
+      private void btnRegisterActionPerformed(java.awt.event.ActionEvent evt) {                                           
+    String username = txtUsername.getText().trim();
+    String password = String.valueOf(txtPassword.getPassword()).trim();
+
+    // Validation for empty fields
+    if (username.isEmpty() || password.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Username and Password cannot be empty!");
+        return;
+    }
+
+    try {
+        Connection con = DriverManager.getConnection(
+                "jdbc:mysql://localhost/userdb", "root", "");
+
+        PreparedStatement pst = con.prepareStatement(
+                "INSERT INTO users(username, password) VALUES (?, ?)");
+
+        pst.setString(1, username);
+        pst.setString(2, password);
+
+        pst.executeUpdate();
+
+        JOptionPane.showMessageDialog(this, "Registration Successful!");
+        this.dispose();  // close registration
+        new LoginForm().setVisible(true);  // go to login
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Username already exists or DB error!");
+    }
+}
+
+
+
+
+
+
+   4) Login Form Code
+
+
+      private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {                                         
+    String username = txtUsername.getText().trim();
+    String password = String.valueOf(txtPassword.getPassword()).trim();
+
+    // Validation for empty fields
+    if (username.isEmpty() || password.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Please enter username and password!");
+        return;
+    }
+
+    try {
+        Connection con = DriverManager.getConnection(
+                "jdbc:mysql://localhost/userdb", "root", "");
+
+        PreparedStatement pst = con.prepareStatement(
+                "SELECT * FROM users WHERE username=? AND password=?");
+
+        pst.setString(1, username);
+        pst.setString(2, password);
+
+        ResultSet rs = pst.executeQuery();
+
+        if (rs.next()) {
+            JOptionPane.showMessageDialog(this, "Login Successful!");
+            new Dashboard().setVisible(true); // your next page
+            this.dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Wrong username or password!");
+        }
+
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Database Error!");
+    }
+}
